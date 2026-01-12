@@ -84,6 +84,7 @@ After installation, import and use the driver:
 ```python
 import asyncio
 import uuid
+import pprint
 from graphiti_postgres import PostgresDriver
 
 async def main():
@@ -114,7 +115,7 @@ async def main():
         parameters={'name': 'Example Node'}
     )
 
-    print(results)
+    pprint.pprint(results)
 
     # Close when done
     await driver.close()
@@ -133,7 +134,7 @@ results = await driver.execute_query(
 
 # The driver automatically translates Cypher to SQL and executes it
 for result in results:
-    print(result)
+    pprint.pprint(result)
 ```
 
 For advanced Cypher parser usage (direct SQL generation):
