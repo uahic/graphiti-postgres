@@ -16,6 +16,10 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests", "examples", "docs"]),
+    package_data={
+        "graphiti_postgres": ["cypher/grammar.lark"],
+    },
+    include_package_data=True,
     python_requires=">=3.10",
     install_requires=[
         "asyncpg>=0.29.0",

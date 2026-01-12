@@ -3,19 +3,13 @@ Integration tests for PostgreSQL Graphiti Driver with Cypher Parser
 Tests the full stack: Cypher query -> AST -> SQL -> Database execution
 """
 
-import sys
-from pathlib import Path
-
-# Add parent directory to path so we can import modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 import pytest
 import pytest_asyncio
 import asyncio
 import uuid
 from datetime import datetime
-from postgres_driver import PostgresDriver
-from cypher import CypherParser, SQLGenerator
+from graphiti_postgres import PostgresDriver
+from graphiti_postgres.cypher import CypherParser, SQLGenerator
 
 
 @pytest_asyncio.fixture

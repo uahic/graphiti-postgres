@@ -3,18 +3,12 @@ Basic tests for PostgreSQL Graphiti Driver
 Run with: pytest test_driver.py
 """
 
-import sys
-from pathlib import Path
-
-# Add parent directory to path so we can import modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 import pytest
 import pytest_asyncio
 import asyncio
 import uuid
 from datetime import datetime
-from postgres_driver import PostgresDriver
+from graphiti_postgres import PostgresDriver
 
 
 @pytest_asyncio.fixture

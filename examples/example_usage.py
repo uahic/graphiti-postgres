@@ -3,15 +3,10 @@ Example usage of PostgreSQL driver for Graphiti
 """
 
 import asyncio
-import sys
 import uuid
 from datetime import datetime
-from pathlib import Path
 
-# Add parent directory to path so we can import modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from postgres_driver import PostgresDriver
+from graphiti_postgres import PostgresDriver
 
 
 async def example_basic_operations():
