@@ -2,5 +2,6 @@ include README.md
 include LICENSE
 include requirements.txt
 recursive-include graphiti_postgres *.lark
+recursive-include graphiti_postgres *.sql
 recursive-include sql *.sql
 recursive-include docs *.md

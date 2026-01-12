@@ -17,7 +17,7 @@ async def driver():
     """Create a test driver instance"""
     driver = PostgresDriver(
         host='localhost',
-        port=5433,
+        port=5432,
         user='postgres',
         password='postgres',
         database='postgres',

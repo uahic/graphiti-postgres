@@ -17,7 +17,10 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests", "examples", "docs"]),
     package_data={
-        "graphiti_postgres": ["cypher/grammar.lark"],
+        "graphiti_postgres": [
+            "cypher/grammar.lark",
+            "sql/schema.sql",
+        ],
     },
     include_package_data=True,
     python_requires=">=3.10",
