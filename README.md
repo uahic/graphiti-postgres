@@ -36,14 +36,15 @@ graphiti-postgres/
 │   └── example_usage.py      # Driver examples
 ├── tests/                     # Test suite
 │   ├── test_cypher_parser.py # Parser unit tests
-│   └── test_driver.py        # Driver integration tests
+│   ├── test_driver.py        # Driver integration tests
+│   └── test_driver_with_cypher.py  # Driver + Cypher tests
 ├── sql/                       # Database schemas
 │   └── schema.sql            # PostgreSQL schema
-├── scripts/                   # Utility scripts
-│   └── setup_env.sh          # Environment setup
+├── docker/                    # Docker setup
+│   └── docker-compose.yml    # Docker Compose configuration
 ├── postgres_driver.py         # Main driver implementation
+├── setup.py                   # Package setup script
 ├── requirements.txt           # Python dependencies
-├── docker-compose.yml         # Docker setup
 └── README.md                  # This file
 ```
 
@@ -74,7 +75,9 @@ Required packages:
 - `lark` - Cypher parser
 - `pgvector` (optional) - For vector embeddings support
 
-### 2. Set Up Database Schema
+## Database Setup
+
+### 1. Set Up Database Schema
 
 ```bash
 # Connect to your PostgreSQL database
@@ -82,8 +85,10 @@ psql -U postgres -d your_database -f sql/schema.sql
 ```
 
 ```bash
-# In case you are using postgres via docker
-docker exec -i graphiti-postgres psql -U postgres -d postgres < sql/schema.sql
+# Using Docker Compose (from docker/ directory)
+cd docker
+docker-compose up -d
+docker exec -i graphiti-postgres psql -U postgres -d postgres < ../sql/schema.sql
 ```
 
 Or programmatically:
@@ -93,7 +98,7 @@ driver = PostgresDriver(...)
 await driver.build_indices_and_constraints()
 ```
 
-### 3. Optional: Enable pgvector for Embeddings
+### 2. Optional: Enable pgvector for Embeddings
 
 If you want to use vector embeddings for semantic search:
 
@@ -259,12 +264,14 @@ await driver.build_indices_and_constraints(delete_existing=True)
 
 ## Examples
 
-See [example_usage.py](./example_usage.py) for comprehensive examples:
+See [examples/example_usage.py](examples/example_usage.py) for comprehensive examples:
 - Basic CRUD operations
 - Multi-tenancy
 - Graph traversal
 - Graphiti integration
 - Search functionality
+
+See [examples/cypher_examples.py](examples/cypher_examples.py) for Cypher parser examples.
 
 ## Cypher Parser
 
