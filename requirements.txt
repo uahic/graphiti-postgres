@@ -1,0 +1,14 @@
+# PostgreSQL Driver for Graphiti
+# Install with: pip install -r requirements.txt
+
+# Core dependencies
+asyncpg>=0.29.0        # Async PostgreSQL driver
+graphiti-core>=0.8.0   # Graphiti core library
+lark>=1.1.9            # Cypher parser (grammar-based)
+
+# Optional: for vector embeddings (if using pgvector)
+pgvector>=0.2.0
+
+# Development dependencies
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
