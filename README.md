@@ -77,6 +77,8 @@ Required packages:
 
 ## Quick Start
 
+📖 **New to Cypher?** See the [Cypher Usage Guide](docs/CYPHER_USAGE_GUIDE.md) for a complete tutorial on using Cypher queries to access the database.
+
 After installation, import and use the driver:
 
 ```python
@@ -120,7 +122,21 @@ async def main():
 asyncio.run(main())
 ```
 
-For Cypher parser usage:
+For using Cypher to query the database:
+
+```python
+# Execute Cypher queries directly through the driver
+results = await driver.execute_query(
+    "MATCH (n:Entity) WHERE n.age > $min_age RETURN n",
+    parameters={'min_age': 25}
+)
+
+# The driver automatically translates Cypher to SQL and executes it
+for result in results:
+    print(result)
+```
+
+For advanced Cypher parser usage (direct SQL generation):
 
 ```python
 from graphiti_postgres.cypher import CypherParser, SQLGenerator
@@ -132,7 +148,10 @@ generator = SQLGenerator(group_id='my_app')
 cypher = "MATCH (a:Person)-[:KNOWS]->(b:Person) RETURN a, b"
 ast = parser.parse(cypher)
 sql, params = generator.generate(ast, {})
-print(sql)
+
+# Execute the generated SQL directly
+async with driver.pool.acquire() as conn:
+    results = await conn.fetch(sql, *params)
 ```
 
 ## Database Setup
@@ -350,14 +369,29 @@ await driver.build_indices_and_constraints(delete_existing=True)
 
 ## Examples
 
-See [examples/example_usage.py](examples/example_usage.py) for comprehensive examples:
+See the following example files for different use cases:
+
+### [examples/cypher_database_access.py](examples/cypher_database_access.py)
+**Complete guide to using Cypher queries to access the database:**
+- Creating and querying nodes with Cypher
+- Building and traversing relationships
+- Advanced queries (aggregation, filtering, sorting)
+- Parameterized queries
+- Comparison of different approaches
+- Direct SQL generation for advanced use cases
+
+### [examples/example_usage.py](examples/example_usage.py)
+**PostgreSQL driver examples:**
 - Basic CRUD operations
 - Multi-tenancy
 - Graph traversal
 - Graphiti integration
 - Search functionality
 
-See [examples/cypher_examples.py](examples/cypher_examples.py) for Cypher parser examples.
+### [examples/cypher_examples.py](examples/cypher_examples.py)
+**Cypher parser examples (SQL translation only):**
+- See how different Cypher queries translate to SQL
+- Parser capabilities demonstration
 
 ## Cypher Parser
 
