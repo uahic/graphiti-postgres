@@ -81,6 +81,7 @@ After installation, import and use the driver:
 
 ```python
 import asyncio
+import uuid
 from graphiti_postgres import PostgresDriver
 
 async def main():
@@ -89,14 +90,17 @@ async def main():
         host='localhost',
         port=5432,
         user='postgres',
-        password='your_password',
-        database='your_database',
+        password='postgres',
+        database='postgres',
         group_id='my_app'
     )
 
-    # Create a node
+    # Initialize connection pool (recommended but optional)
+    await driver.initialize()
+
+    # Create a node (note: uuid must be a valid UUID string)
     node = await driver.create_node(
-        uuid='node-1',
+        uuid=str(uuid.uuid4()),  # Generate a proper UUID
         name='Example Node',
         node_type='entity',
         properties={'key': 'value'}
@@ -107,6 +111,8 @@ async def main():
         "MATCH (n:Entity) WHERE n.name = $name RETURN n",
         parameters={'name': 'Example Node'}
     )
+
+    print(results)
 
     # Close when done
     await driver.close()
@@ -154,9 +160,10 @@ driver = PostgresDriver(
     host='localhost',
     port=5432,
     user='postgres',
-    password='your_password',
-    database='your_database'
+    password='postgres',
+    database='postgres'
 )
+await driver.initialize()
 await driver.build_indices_and_constraints()
 ```
 
@@ -312,6 +319,7 @@ CREATE INDEX idx_custom ON graph_nodes ((properties->>'custom_field'));
 from graphiti_postgres import PostgresDriver
 
 driver = PostgresDriver(...)
+await driver.initialize()
 
 # Test connection
 is_healthy = await driver.health_check()
@@ -336,6 +344,7 @@ Rebuild indices:
 from graphiti_postgres import PostgresDriver
 
 driver = PostgresDriver(...)
+await driver.initialize()
 await driver.build_indices_and_constraints(delete_existing=True)
 ```
 

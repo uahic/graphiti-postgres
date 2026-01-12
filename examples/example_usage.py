@@ -15,7 +15,7 @@ async def example_basic_operations():
     # Initialize driver (adjust credentials for your setup)
     driver = PostgresDriver(
         host='localhost',
-        port=5433,
+        port=5432,
         user='postgres',
         password='postgres',  # Change to your password
         database='postgres',
@@ -120,7 +120,7 @@ async def example_graphiti_integration():
         # Initialize PostgreSQL driver (set your credentials)
         driver = PostgresDriver(
             host='localhost',
-            port=5433,
+            port=5432,
             user='postgres',
             password='postgres',  # Change to your password
             database='postgres',
@@ -163,7 +163,7 @@ async def example_multi_tenancy():
     # Create driver for tenant 1 (adjust credentials for your setup)
     tenant1_driver = PostgresDriver(
         host='localhost',
-        port=5433,
+        port=5432,
         user='postgres',
         password='postgres',  # Change to your password
         database='postgres',
@@ -230,7 +230,7 @@ async def example_graph_traversal():
 
     driver = PostgresDriver(
         host='localhost',
-        port=5433,
+        port=5432,
         user='postgres',
         password='postgres',  # Change to your password
         database='postgres',

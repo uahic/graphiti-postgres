@@ -284,9 +284,6 @@ class PostgresDriver(GraphDriver):
         self.pool: Optional[asyncpg.Pool] = None
         self.translator = CypherToSQLTranslator(group_id=group_id)
 
-        # Initialize connection pool
-        asyncio.create_task(self._init_pool())
-
     async def _init_pool(self):
         """Initialize asyncpg connection pool"""
         if self.pool is None:
@@ -304,6 +301,20 @@ class PostgresDriver(GraphDriver):
             except Exception as e:
                 logger.error(f"Failed to create connection pool: {e}")
                 raise
+
+    async def initialize(self):
+        """
+        Initialize the driver and connection pool.
+
+        This should be called after creating the driver instance before using it.
+        All query methods will automatically initialize the pool if not done manually,
+        but calling this explicitly allows you to handle connection errors upfront.
+
+        Returns:
+            self for method chaining
+        """
+        await self._init_pool()
+        return self
 
     async def execute_query(self, cypher_query: str, **kwargs: Any) -> list[dict]:
         """
