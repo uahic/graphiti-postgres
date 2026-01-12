@@ -18,12 +18,11 @@ Quick navigation to all documentation files in the graphiti-postgres project.
 
 - **[Parser Examples](../examples/cypher_examples.py)** - 15+ Cypher translation examples
 - **[Driver Examples](../examples/example_usage.py)** - PostgresDriver usage examples
-- **[Integration Tests](../examples/test_driver.py)** - Full driver integration tests
 
 ## Database
 
 - **[PostgreSQL Schema](../sql/schema.sql)** - Database schema definition
-- **[Setup Script](../scripts/setup_env.sh)** - Environment setup automation
+- **[Docker Setup](../docker/docker-compose.yml)** - Docker Compose configuration
 
 ## Development
 
@@ -56,8 +55,9 @@ graphiti-postgres/
 ├── examples/                  # Code examples
 ├── tests/                     # Test suite
 ├── sql/                       # Database schemas
-├── scripts/                   # Utility scripts
+├── docker/                    # Docker configuration
 ├── postgres_driver.py         # Main driver
+├── setup.py                   # Package setup
 └── requirements.txt           # Dependencies
 ```
 
@@ -81,7 +81,7 @@ graphiti-postgres/
 
 - [Driver API](../postgres_driver.py)
 - [Cypher to SQL Translation](../cypher/README.md#sql-translation-patterns)
-- [Integration Tests](../examples/test_driver.py)
+- [Integration Tests](../tests/test_driver.py)
 
 ## Feature Documentation
 
