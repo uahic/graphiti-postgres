@@ -1,0 +1,260 @@
+// Cypher Query Grammar for Lark Parser
+// Based on openCypher specification with PostgreSQL-focused subset
+
+start: query
+
+// Query structure
+query: regular_query | standalone_call
+
+regular_query: single_query (union single_query)*
+
+single_query: clause+
+
+union: "UNION"i "ALL"i -> union_all
+     | "UNION"i -> union_distinct
+
+// Clauses
+clause: match
+      | optional_match
+      | with_clause
+      | return_clause
+      | create
+      | merge
+      | delete
+      | set_clause
+      | remove
+      | where
+
+// MATCH
+match: "MATCH"i pattern ("," pattern)* where?
+
+optional_match: "OPTIONAL"i "MATCH"i pattern ("," pattern)* where?
+
+// Pattern matching
+pattern: pattern_part ("," pattern_part)*
+
+pattern_part: variable "=" anonymous_pattern_part -> named_path
+            | anonymous_pattern_part
+
+anonymous_pattern_part: pattern_element
+
+pattern_element: node_pattern (relationship_pattern node_pattern)*
+
+node_pattern: "(" variable? label_expression? properties? ")"
+
+relationship_pattern: left_arrow_head? dash relationship_detail? dash right_arrow_head?
+
+left_arrow_head: "<"
+right_arrow_head: ">"
+dash: "-"
+
+relationship_detail: "[" variable? relationship_types? variable_length? properties? "]"
+
+relationship_types: ":" rel_type ("|" ":" rel_type)*
+
+rel_type: IDENTIFIER
+
+variable_length: "*" range?
+
+range: INT ".." INT  -> range_explicit
+     | INT ".."      -> range_min
+     | ".." INT      -> range_max
+     | "*"           -> range_all
+
+// Labels
+label_expression: label_term ("|" label_term)*
+
+label_term: ":" IDENTIFIER
+
+// Properties
+properties: "{" property_list? "}"
+
+property_list: property ("," property)*
+
+property: property_key ":" expression
+
+property_key: IDENTIFIER
+
+// WHERE clause
+where: "WHERE"i expression
+
+// RETURN clause
+return_clause: "RETURN"i projection_body
+
+with_clause: "WITH"i projection_body where?
+
+projection_body: distinct_marker? projection_items order? skip? limit?
+
+distinct_marker: "DISTINCT"i
+
+projection_items: "*" ("," projection_item)* -> projection_with_star
+                | projection_item ("," projection_item)* -> projection_list
+
+projection_item: expression ("AS"i variable)?
+
+order: "ORDER"i "BY"i sort_item ("," sort_item)*
+
+sort_item: expression sort_order?
+
+sort_order: "ASC"i -> asc
+          | "DESC"i -> desc
+          | "ASCENDING"i -> asc
+          | "DESCENDING"i -> desc
+
+skip: "SKIP"i expression
+
+limit: "LIMIT"i expression
+
+// CREATE
+create: "CREATE"i pattern ("," pattern)*
+
+// MERGE
+merge: "MERGE"i pattern_part (merge_action)*
+
+merge_action: "ON"i "MATCH"i set_clause -> on_match
+            | "ON"i "CREATE"i set_clause -> on_create
+
+// DELETE
+delete: "DETACH"i "DELETE"i expression ("," expression)* -> detach_delete
+      | "DELETE"i expression ("," expression)* -> delete
+
+// SET
+set_clause: "SET"i set_item ("," set_item)*
+
+set_item: postfix_expression "=" expression -> set_property
+        | variable "+=" expression -> set_properties_map
+        | variable ":" IDENTIFIER -> set_label
+
+// REMOVE
+remove: "REMOVE"i remove_item ("," remove_item)*
+
+remove_item: variable ":" IDENTIFIER -> remove_label
+           | variable "." property_key -> remove_property
+
+// CALL (procedures)
+standalone_call: "CALL"i procedure_name "(" expression_list? ")" ("YIELD"i procedure_result)?
+
+procedure_name: IDENTIFIER ("." IDENTIFIER)*
+
+procedure_result: variable ("," variable)*
+
+// Expressions
+expression: or_expression
+
+or_expression: and_expression ("OR"i and_expression)*
+
+and_expression: not_expression ("AND"i not_expression)*
+
+not_expression: "NOT"i not_expression -> not_expr
+              | comparison_expression
+
+comparison_expression: add_expression (null_check | comp_op add_expression)?
+
+null_check: "IS"i "NOT"i "NULL"i -> is_not_null_op
+          | "IS"i "NULL"i -> is_null_op
+
+comp_op: "=" -> eq_op
+       | "<>" -> ne_op
+       | "!=" -> ne_op2
+       | "<" -> lt_op
+       | ">" -> gt_op
+       | "<=" -> lte_op
+       | ">=" -> gte_op
+       | "IN"i -> in_op
+       | "CONTAINS"i -> contains_op
+       | "STARTS"i "WITH"i -> starts_with_op
+       | "ENDS"i "WITH"i -> ends_with_op
+       | "=~" -> regex_op
+
+add_expression: multiply_expression (("+"|"-") multiply_expression)*
+
+multiply_expression: power_expression (("*"|"/"|"%") power_expression)*
+
+power_expression: unary_expression ("^" unary_expression)*
+
+unary_expression: ("+"|"-") unary_expression
+                | postfix_expression
+
+postfix_expression: atom (property_lookup | index_lookup)*
+
+property_lookup: "." property_key
+
+index_lookup: "[" expression "]"
+
+// Atoms (base expressions)
+atom: number
+    | string
+    | "NULL"i -> null_literal
+    | "TRUE"i -> true_literal
+    | "FALSE"i -> false_literal
+    | parameter
+    | case_expression
+    | list_comprehension
+    | pattern_comprehension
+    | quantifier
+    | function_invocation
+    | variable
+    | "(" expression ")"
+    | list_literal
+    | map_literal
+
+// Literals
+number: INT -> integer
+      | FLOAT -> float_number
+
+string: STRING
+
+parameter: "$" IDENTIFIER
+
+// Case expression
+case_expression: "CASE"i case_alternative+ ("ELSE"i expression)? "END"i -> case_expr
+               | "CASE"i expression case_alternative+ ("ELSE"i expression)? "END"i -> case_simple
+
+case_alternative: "WHEN"i expression "THEN"i expression
+
+// List and Map literals
+list_literal: "[" expression_list? "]"
+
+expression_list: expression ("," expression)*
+
+map_literal: "{" map_item_list? "}"
+
+map_item_list: map_item ("," map_item)*
+
+map_item: property_key ":" expression
+
+// List comprehension
+list_comprehension: "[" filter_expression "]"
+
+filter_expression: variable "IN"i expression ("WHERE"i expression)? ("|" expression)?
+
+// Pattern comprehension
+pattern_comprehension: "[" variable "=" pattern ("WHERE"i expression)? "|" expression "]"
+
+// Quantifiers
+quantifier: ("ALL"i | "ANY"i | "NONE"i | "SINGLE"i) "(" filter_expression ")"
+
+// Function calls
+function_invocation: function_name "(" ("DISTINCT"i)? expression_list? ")"
+
+function_name: IDENTIFIER
+
+// Variable
+variable: IDENTIFIER
+
+// Terminals
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+
+STRING: /"([^"\\]|\\.)*"/ | /'([^'\\]|\\.)*'/
+
+INT: /[0-9]+/
+
+FLOAT: /[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?/
+
+// Whitespace and comments
+%import common.WS
+%ignore WS
+
+COMMENT: "//" /[^\n]*/
+       | "/*" /(.|\n)*?/ "*/"
+%ignore COMMENT
