@@ -3,14 +3,7 @@ Examples demonstrating the Cypher parser capabilities
 Run these to see how Cypher queries are translated to PostgreSQL SQL
 """
 
-import sys
-from pathlib import Path
-
-# Add parent directory to path so we can import cypher module
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from cypher.parser import CypherParser
-from cypher.sql_generator import SQLGenerator
+from graphiti_postgres.cypher import CypherParser, SQLGenerator
 
 
 def print_translation(title: str, cypher: str, params: dict = None):

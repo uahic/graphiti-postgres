@@ -75,6 +75,60 @@ Required packages:
 - `lark` - Cypher parser
 - `pgvector` (optional) - For vector embeddings support
 
+## Quick Start
+
+After installation, import and use the driver:
+
+```python
+import asyncio
+from graphiti_postgres import PostgresDriver
+
+async def main():
+    # Initialize the driver
+    driver = PostgresDriver(
+        host='localhost',
+        port=5432,
+        user='postgres',
+        password='your_password',
+        database='your_database',
+        group_id='my_app'
+    )
+
+    # Create a node
+    node = await driver.create_node(
+        uuid='node-1',
+        name='Example Node',
+        node_type='entity',
+        properties={'key': 'value'}
+    )
+
+    # Query nodes
+    results = await driver.execute_query(
+        "MATCH (n:Entity) WHERE n.name = $name RETURN n",
+        parameters={'name': 'Example Node'}
+    )
+
+    # Close when done
+    await driver.close()
+
+asyncio.run(main())
+```
+
+For Cypher parser usage:
+
+```python
+from graphiti_postgres.cypher import CypherParser, SQLGenerator
+
+parser = CypherParser()
+generator = SQLGenerator(group_id='my_app')
+
+# Parse and translate Cypher to SQL
+cypher = "MATCH (a:Person)-[:KNOWS]->(b:Person) RETURN a, b"
+ast = parser.parse(cypher)
+sql, params = generator.generate(ast, {})
+print(sql)
+```
+
 ## Database Setup
 
 ### 1. Set Up Database Schema
@@ -94,7 +148,15 @@ docker exec -i graphiti-postgres psql -U postgres -d postgres < ../sql/schema.sq
 Or programmatically:
 
 ```python
-driver = PostgresDriver(...)
+from graphiti_postgres import PostgresDriver
+
+driver = PostgresDriver(
+    host='localhost',
+    port=5432,
+    user='postgres',
+    password='your_password',
+    database='your_database'
+)
 await driver.build_indices_and_constraints()
 ```
 
@@ -190,10 +252,16 @@ SELECT * FROM get_node_neighbors(
 Configure pool size based on your workload:
 
 ```python
+from graphiti_postgres import PostgresDriver
+
 driver = PostgresDriver(
+    host='localhost',
+    port=5432,
+    user='postgres',
+    password='your_password',
+    database='your_database',
     min_pool_size=2,
-    max_pool_size=20,
-    ...
+    max_pool_size=20
 )
 ```
 
@@ -218,11 +286,13 @@ For deep traversals:
 Extend the `CypherToSQLTranslator` for your specific Cypher patterns:
 
 ```python
+from graphiti_postgres import CypherToSQLTranslator
+
 class CustomTranslator(CypherToSQLTranslator):
-    @staticmethod
-    def _translate_custom_pattern(cypher: str, params: dict):
+    def _simple_translate(self, cypher: str, params: dict):
         # Your custom translation logic
         sql = "SELECT ..."
+        param_list = []
         return sql, param_list
 ```
 
@@ -239,6 +309,10 @@ CREATE INDEX idx_custom ON graph_nodes ((properties->>'custom_field'));
 ### Connection Issues
 
 ```python
+from graphiti_postgres import PostgresDriver
+
+driver = PostgresDriver(...)
+
 # Test connection
 is_healthy = await driver.health_check()
 if not is_healthy:
@@ -259,6 +333,9 @@ logging.basicConfig(level=logging.DEBUG)
 Rebuild indices:
 
 ```python
+from graphiti_postgres import PostgresDriver
+
+driver = PostgresDriver(...)
 await driver.build_indices_and_constraints(delete_existing=True)
 ```
 

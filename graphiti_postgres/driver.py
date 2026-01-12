@@ -23,7 +23,7 @@ except ImportError:
 from enum import Enum
 
 # Import new Cypher parser
-from cypher import CypherParser, SQLGenerator
+from .cypher import CypherParser, SQLGenerator
 
 logger = logging.getLogger(__name__)
 

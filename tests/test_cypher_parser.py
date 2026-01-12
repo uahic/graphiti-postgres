@@ -2,15 +2,10 @@
 Comprehensive test suite for Cypher parser and SQL generator
 """
 
-import sys
 import unittest
-from pathlib import Path
 
-# Add parent directory to path so we can import modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from cypher import CypherParser, SQLGenerator
-from cypher.ast_nodes import *
+from graphiti_postgres.cypher import CypherParser, SQLGenerator
+from graphiti_postgres.cypher.ast_nodes import *
 
 
 class TestCypherParser(unittest.TestCase):
