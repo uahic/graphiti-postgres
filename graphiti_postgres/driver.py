@@ -18,9 +18,13 @@ except ImportError:
         "asyncpg is required for PostgreSQL driver. Install with: pip install asyncpg"
     )
 
-# These imports would come from graphiti_core in actual usage
-# For now, we define minimal interfaces
+# Import from graphiti_core
 from enum import Enum
+try:
+    from graphiti_core.driver.driver import GraphDriver as CoreGraphDriver
+except ImportError:
+    # Fallback for standalone usage
+    CoreGraphDriver = None
 
 # Import new Cypher parser
 from .cypher import CypherParser, SQLGenerator
@@ -49,27 +53,31 @@ class GraphDriverSession(ABC):
         raise NotImplementedError()
 
 
-class GraphDriver(ABC):
-    """Abstract base class for graph database drivers"""
-    provider: GraphProvider
-    fulltext_syntax: str = ''
-    _database: str
-    default_group_id: str = ''
+# Use CoreGraphDriver if available, otherwise define our own
+if CoreGraphDriver is not None:
+    GraphDriver = CoreGraphDriver
+else:
+    class GraphDriver(ABC):
+        """Abstract base class for graph database drivers"""
+        provider: GraphProvider
+        fulltext_syntax: str = ''
+        _database: str
+        default_group_id: str = ''
 
-    async def execute_query(self, cypher_query: str, **kwargs: Any) -> Coroutine:
-        raise NotImplementedError()
+        async def execute_query(self, cypher_query: str, **kwargs: Any) -> Coroutine:
+            raise NotImplementedError()
 
-    def session(self, database: str | None = None) -> GraphDriverSession:
-        raise NotImplementedError()
+        def session(self, database: str | None = None) -> GraphDriverSession:
+            raise NotImplementedError()
 
-    async def close(self):
-        raise NotImplementedError()
+        async def close(self):
+            raise NotImplementedError()
 
-    async def delete_all_indexes(self) -> Coroutine:
-        raise NotImplementedError()
+        async def delete_all_indexes(self) -> Coroutine:
+            raise NotImplementedError()
 
-    async def build_indices_and_constraints(self, delete_existing: bool = False):
-        raise NotImplementedError()
+        async def build_indices_and_constraints(self, delete_existing: bool = False):
+            raise NotImplementedError()
 
 
 class PostgresDriverSession(GraphDriverSession):
