@@ -2,7 +2,7 @@
 
 WARNING: THIS IS AN EXPERIMENTAL IMPLEMENTATION IN ALPHA VERSION, DO BACKUP DATA BEFORE RUNNING ANY CODE OF THIS REPOSITORY
 
-A native PostgreSQL implementation of the Graphiti GraphDriver interface, allowing you to use Graphiti's knowledge graph capabilities without requiring FalkorDB or other specialized graph databases.
+A PostgreSQL implementation of the Graphiti GraphDriver interface, allowing you to use Graphiti's knowledge graph capabilities without requiring FalkorDB or other specialized graph databases if top-notch performance is not your main concern.
 
 ## Features
 
