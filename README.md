@@ -1,6 +1,7 @@
 # PostgreSQL Driver for Graphiti
 
-WARNING: THIS IS AN EXPERIMENTAL IMPLEMENTATION IN ALPHA VERSION, DO BACKUP DATA BEFORE RUNNING ANY CODE OF THIS REPOSITORY
+WARNING: THIS IS AN EXPERIMENTAL IMPLEMENTATION IN ALPHA VERSION. Please backup your data before employing this implementation just to be on the safe side.
+
 
 A PostgreSQL implementation of the Graphiti GraphDriver interface, allowing you to use Graphiti's knowledge graph capabilities without requiring FalkorDB or other specialized graph databases if top-notch performance is not your main concern.
 
