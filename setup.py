@@ -12,7 +12,7 @@ setup(
     name="graphiti-postgres",
     version="0.1.0",
     author="Martin Schulze",
-    description="PostgreSQL driver for Graphiti with full Cypher parser",
+    description="PostgreSQL and Apache Age drivers for Graphiti with full Cypher support",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests", "examples", "docs"]),
@@ -20,6 +20,7 @@ setup(
         "graphiti_postgres": [
             "cypher/grammar.lark",
             "sql/schema.sql",
+            "sql/age_schema.sql",
         ],
     },
     include_package_data=True,
