@@ -1,37 +1,14 @@
 # PostgreSQL and Apache Age Drivers for Graphiti
 
-<<<<<<< HEAD
-WARNING: THIS IS AN EXPERIMENTAL IMPLEMENTATION IN ALPHA VERSION. Please backup your data before employing this implementation just to be on the safe side.
-
-
-A PostgreSQL implementation of the Graphiti GraphDriver interface, allowing you to use Graphiti's knowledge graph capabilities without requiring FalkorDB or other specialized graph databases if top-notch performance is not your main concern.
-=======
 ⚠️ **WARNING**: THIS IS AN EXPERIMENTAL IMPLEMENTATION IN ALPHA VERSION. BACKUP DATA BEFORE RUNNING ANY CODE FROM THIS REPOSITORY.
 
 Native PostgreSQL and Apache Age implementations of the Graphiti GraphDriver interface, providing flexible options for graph database backends.
 
-## 🎯 Choose Your Driver
-
-### PostgreSQL Driver (Relational + Graph)
-Best for hybrid SQL and graph queries with vector similarity search.
-
-- ✅ Hybrid SQL + graph queries
-- ✅ Vector similarity search (pgvector)
-- ✅ Advanced fulltext search (pg_trgm)
-- ✅ Existing PostgreSQL infrastructure
-
-### Apache Age Driver (Pure Graph) 🆕
-Best for pure graph workloads with native Cypher support.
-
-- ✅ Native graph database with Cypher
-- ✅ Simpler architecture (no translation)
-- ✅ Better graph traversal performance
-- ✅ Multi-tenancy with strong isolation
-
-📖 **[Read the comparison →](#choosing-a-driver)**
->>>>>>> 4ccce5b (Implemented AGE driver)
-
 ## Features
+
+This package offers two different drivers:
+- Postgres without Apache AGE and a poor man's custom implementation for Cypher on python-level
+- Apache AGE driver for native performance and mixed SQL/Cypher queries
 
 ### Common Features (Both Drivers)
 
@@ -51,43 +28,8 @@ Best for pure graph workloads with native Cypher support.
 
 ### Apache Age Driver Specific
 
-- **Native Cypher**: Full OpenCypher support without translation
-- **True Graph Storage**: Vertices and edges as first-class entities
-- **Graph Isolation**: Separate graphs per tenant for strong isolation
-- **Simpler Code**: Direct Cypher execution (~500 lines vs ~1500 lines)
-
-## Project Structure
-
-```
-graphiti-postgres/
-├── cypher/                    # Cypher parser package
-│   ├── grammar.lark          # Cypher grammar definition
-│   ├── ast_nodes.py          # AST node classes
-│   ├── parser.py             # Parser + transformer
-│   ├── sql_generator.py      # SQL generation
-│   └── README.md             # Parser documentation
-├── docs/                      # Documentation
-│   ├── PARSER_IMPLEMENTATION.md
-│   ├── QUICK_START.md
-│   ├── QUICKSTART.md
-│   ├── APACHE_AGE_ANALYSIS.md
-│   └── CONTRIBUTING.md
-├── examples/                  # Usage examples
-│   ├── cypher_examples.py    # Parser examples
-│   └── example_usage.py      # Driver examples
-├── tests/                     # Test suite
-│   ├── test_cypher_parser.py # Parser unit tests
-│   ├── test_driver.py        # Driver integration tests
-│   └── test_driver_with_cypher.py  # Driver + Cypher tests
-├── sql/                       # Database schemas
-│   └── schema.sql            # PostgreSQL schema
-├── docker/                    # Docker setup
-│   └── docker-compose.yml    # Docker Compose configuration
-├── postgres_driver.py         # Main driver implementation
-├── setup.py                   # Package setup script
-├── requirements.txt           # Python dependencies
-└── README.md                  # This file
-```
+- **Native Cypher**: Full OpenCypher support without translation o
+- **Graph Storage**: Vertices and edges as first-class entities
 
 ## Installation
 
@@ -366,36 +308,6 @@ Examples cover:
 - ✅ Multi-tenancy (separate graphs for data isolation)
 - ✅ Temporal queries (bi-temporal tracking with valid_at/invalid_at)
 
-📖 **[Read full Apache Age documentation →](docs/APACHE_AGE_USAGE.md)**
-
-## Choosing a Driver
-
-| Aspect | PostgreSQL Driver | Apache Age Driver |
-|--------|-------------------|-------------------|
-| **Storage Model** | Relational tables | Native graph |
-| **Cypher Support** | Translated to SQL | Native (no translation) |
-| **Best For** | Hybrid SQL + graph queries | Pure graph workloads |
-| **Vector Search** | ✅ Native pgvector | ⚠️ Store as arrays (no native ops) |
-| **Fulltext Search** | ✅ pg_trgm advanced | ⚠️ Basic string matching |
-| **Multi-Tenancy** | group_id filtering | Separate graphs (better isolation) |
-| **Graph Traversal** | Good | Better (native) |
-| **Code Complexity** | High (~1500 lines) | Low (~500 lines) |
-| **Setup** | Standard PostgreSQL | Requires Age extension |
-
-### Recommendations
-
-**Choose PostgreSQL Driver if:**
-- You need vector similarity search (embeddings)
-- You want hybrid SQL and graph queries
-- You have existing PostgreSQL infrastructure
-- You need advanced fulltext search
-
-**Choose Apache Age Driver if:**
-- You want native graph database features
-- You prefer pure Cypher queries
-- You need simpler architecture
-- Multi-tenancy with strong isolation is important
-- Graph traversal performance is critical
 
 ## Architecture
 
@@ -621,32 +533,12 @@ ORDER BY friendCount DESC
 LIMIT 10
 ```
 
-See [cypher/README.md](cypher/README.md) for complete parser documentation.
 
 ## Limitations
 
 1. **Graph Algorithms**: Native PostgreSQL doesn't include built-in graph algorithms (shortest path, PageRank, etc.). You'll need to implement these in SQL or use external libraries.
 2. **Performance**: For very large graphs (millions of nodes), specialized graph databases may perform better for complex traversals.
 3. **Procedure Calls**: Limited support for CALL procedures (implementation-dependent).
-
-## Future Enhancements
-
-Potential improvements:
-- [x] ~~Full Cypher parser for complete query translation~~ ✅ **COMPLETED**
-- [ ] Graph algorithm implementations (shortest path, community detection)
-- [ ] Optimized batch operations
-- [ ] Streaming query results for large datasets
-- [ ] Integration with Apache AGE (optional mode)
-- [ ] GraphQL API wrapper
-
-## Contributing
-
-This is an experimental implementation. Contributions welcome:
-- Extend Cypher translation support
-- Add graph algorithms
-- Performance optimizations
-- Test coverage improvements
-
 ## License
 
 This driver is provided as-is for use with the Graphiti library. Follow the respective licenses of:
@@ -660,10 +552,3 @@ This driver is provided as-is for use with the Graphiti library. Follow the resp
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [asyncpg Documentation](https://magicstack.github.io/asyncpg/)
 - [Apache AGE](https://age.apache.org/) (alternative approach)
-
-## Support
-
-For issues related to:
-- This driver: Open an issue in your repository
-- Graphiti: [Graphiti GitHub](https://github.com/getzep/graphiti)
-- PostgreSQL: [PostgreSQL Community](https://www.postgresql.org/support/)
