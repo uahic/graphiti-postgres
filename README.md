@@ -1,20 +1,60 @@
-# PostgreSQL Driver for Graphiti
+# PostgreSQL and Apache Age Drivers for Graphiti
 
+<<<<<<< HEAD
 WARNING: THIS IS AN EXPERIMENTAL IMPLEMENTATION IN ALPHA VERSION. Please backup your data before employing this implementation just to be on the safe side.
 
 
 A PostgreSQL implementation of the Graphiti GraphDriver interface, allowing you to use Graphiti's knowledge graph capabilities without requiring FalkorDB or other specialized graph databases if top-notch performance is not your main concern.
+=======
+⚠️ **WARNING**: THIS IS AN EXPERIMENTAL IMPLEMENTATION IN ALPHA VERSION. BACKUP DATA BEFORE RUNNING ANY CODE FROM THIS REPOSITORY.
+
+Native PostgreSQL and Apache Age implementations of the Graphiti GraphDriver interface, providing flexible options for graph database backends.
+
+## 🎯 Choose Your Driver
+
+### PostgreSQL Driver (Relational + Graph)
+Best for hybrid SQL and graph queries with vector similarity search.
+
+- ✅ Hybrid SQL + graph queries
+- ✅ Vector similarity search (pgvector)
+- ✅ Advanced fulltext search (pg_trgm)
+- ✅ Existing PostgreSQL infrastructure
+
+### Apache Age Driver (Pure Graph) 🆕
+Best for pure graph workloads with native Cypher support.
+
+- ✅ Native graph database with Cypher
+- ✅ Simpler architecture (no translation)
+- ✅ Better graph traversal performance
+- ✅ Multi-tenancy with strong isolation
+
+📖 **[Read the comparison →](#choosing-a-driver)**
+>>>>>>> 4ccce5b (Implemented AGE driver)
 
 ## Features
 
+### Common Features (Both Drivers)
+
 - **Full Graphiti Compatibility**: Implements the complete GraphDriver interface
 - **Async/Await**: Built on asyncpg for high performance
-- **Multi-tenancy**: Support for multiple isolated graphs via `group_id`
+- **Multi-tenancy**: Support for multiple isolated graphs
 - **Bi-temporal Tracking**: Tracks both event occurrence time and data validity time
-- **Hybrid Search**: Supports semantic search (embeddings), fulltext search (pg_trgm), and graph traversal
-- **JSONB Properties**: Flexible property storage with efficient indexing
 - **Connection Pooling**: Efficient connection management with configurable pool sizes
-- **Helper Functions**: SQL functions for common graph operations (traversal, neighbors, search)
+- **No sql_id mapping**: Uses UUID directly as node identifiers
+
+### PostgreSQL Driver Specific
+
+- **Hybrid Search**: Semantic search (embeddings), fulltext search (pg_trgm), and graph traversal
+- **JSONB Properties**: Flexible property storage with efficient indexing
+- **Vector Embeddings**: Native pgvector support for similarity search
+- **Cypher Translation**: Comprehensive Cypher-to-SQL translation via AST parser
+
+### Apache Age Driver Specific
+
+- **Native Cypher**: Full OpenCypher support without translation
+- **True Graph Storage**: Vertices and edges as first-class entities
+- **Graph Isolation**: Separate graphs per tenant for strong isolation
+- **Simpler Code**: Direct Cypher execution (~500 lines vs ~1500 lines)
 
 ## Project Structure
 
@@ -197,6 +237,165 @@ CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
 Then modify the `embedding` column type in schema.sql to use `vector(1536)` (or your embedding dimension).
+
+## Apache Age Driver Quick Start 🆕
+
+The Apache Age driver provides native graph database capabilities with full Cypher support.
+
+### 1. Start Apache Age with Docker
+
+```bash
+# Start Apache Age container
+docker-compose -f docker/docker-compose-age.yml up -d
+
+# Initialize Age extension and create default graph
+./docker/init-age.sh
+
+# Check status
+docker ps | grep graphiti-age
+```
+
+The setup will:
+- Run on `localhost:5432`
+- Load the Age extension
+- Create the `graphiti` default graph
+
+### 2. Use the Age Driver
+
+```python
+import asyncio
+import uuid
+from graphiti_postgres import AgeDriver
+
+async def main():
+    # Initialize the Age driver
+    driver = AgeDriver(
+        host='localhost',
+        port=5432,
+        user='postgres',
+        password='postgres',
+        database='postgres',
+        graph_name='graphiti'  # Age uses graph names for multi-tenancy
+    )
+
+    # Initialize connection pool
+    await driver.initialize()
+
+    # Create graph and indices
+    await driver.build_indices_and_constraints()
+
+    # Create nodes using helper methods
+    alice_id = str(uuid.uuid4())
+    await driver.create_node(
+        uuid=alice_id,
+        name='Alice',
+        node_type='entity',
+        properties={'age': 30, 'occupation': 'Engineer'}
+    )
+
+    bob_id = str(uuid.uuid4())
+    await driver.create_node(
+        uuid=bob_id,
+        name='Bob',
+        node_type='entity',
+        properties={'age': 25}
+    )
+
+    # Create relationship
+    await driver.create_edge(
+        uuid=str(uuid.uuid4()),
+        source_uuid=alice_id,
+        target_uuid=bob_id,
+        relation_type='KNOWS',
+        properties={'since': '2020'}
+    )
+
+    # Query using native Cypher (no translation!)
+    results = await driver.execute_query(
+        """
+        MATCH (a:Entity)-[r:KNOWS]->(b:Entity)
+        RETURN a.name as person, b.name as friend, r.since as since
+        """
+    )
+
+    print(results)
+    # [{'person': 'Alice', 'friend': 'Bob', 'since': '2020'}]
+
+    # Graph traversal with variable-length paths
+    traversal = await driver.execute_query(
+        f"""
+        MATCH path = (start {{uuid: '{alice_id}'}})-[*1..3]->(connected)
+        RETURN DISTINCT connected.name as name, length(path) as distance
+        ORDER BY distance
+        """
+    )
+
+    print(traversal)
+
+    await driver.close()
+
+asyncio.run(main())
+```
+
+### 3. Multi-Tenancy with Separate Graphs
+
+```python
+# Create tenant-specific drivers using separate graphs
+tenant1_driver = driver.clone(graph_name='graphiti_tenant_1')
+tenant2_driver = driver.clone(graph_name='graphiti_tenant_2')
+
+# Initialize tenant graphs
+await tenant1_driver.build_indices_and_constraints()
+await tenant2_driver.build_indices_and_constraints()
+
+# Data is completely isolated by graph
+await tenant1_driver.create_node(uuid=str(uuid.uuid4()), name="Tenant 1 Data", node_type="entity")
+await tenant2_driver.create_node(uuid=str(uuid.uuid4()), name="Tenant 2 Data", node_type="entity")
+```
+
+### 4. Run Comprehensive Examples
+
+```bash
+# Run all Age driver examples
+python examples/age_example.py
+```
+
+Examples cover:
+- ✅ CRUD operations (Create, Read, Update, Delete)
+- ✅ Graph traversal (BFS, variable-length paths, pattern matching)
+- ✅ Multi-tenancy (separate graphs for data isolation)
+- ✅ Temporal queries (bi-temporal tracking with valid_at/invalid_at)
+
+📖 **[Read full Apache Age documentation →](docs/APACHE_AGE_USAGE.md)**
+
+## Choosing a Driver
+
+| Aspect | PostgreSQL Driver | Apache Age Driver |
+|--------|-------------------|-------------------|
+| **Storage Model** | Relational tables | Native graph |
+| **Cypher Support** | Translated to SQL | Native (no translation) |
+| **Best For** | Hybrid SQL + graph queries | Pure graph workloads |
+| **Vector Search** | ✅ Native pgvector | ⚠️ Store as arrays (no native ops) |
+| **Fulltext Search** | ✅ pg_trgm advanced | ⚠️ Basic string matching |
+| **Multi-Tenancy** | group_id filtering | Separate graphs (better isolation) |
+| **Graph Traversal** | Good | Better (native) |
+| **Code Complexity** | High (~1500 lines) | Low (~500 lines) |
+| **Setup** | Standard PostgreSQL | Requires Age extension |
+
+### Recommendations
+
+**Choose PostgreSQL Driver if:**
+- You need vector similarity search (embeddings)
+- You want hybrid SQL and graph queries
+- You have existing PostgreSQL infrastructure
+- You need advanced fulltext search
+
+**Choose Apache Age Driver if:**
+- You want native graph database features
+- You prefer pure Cypher queries
+- You need simpler architecture
+- Multi-tenancy with strong isolation is important
+- Graph traversal performance is critical
 
 ## Architecture
 

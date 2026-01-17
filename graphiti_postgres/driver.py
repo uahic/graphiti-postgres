@@ -38,7 +38,8 @@ class GraphProvider(Enum):
     FALKORDB = 'falkordb'
     KUZU = 'kuzu'
     NEPTUNE = 'neptune'
-    POSTGRESQL = 'postgresql'  # New provider
+    POSTGRESQL = 'postgresql'
+    APACHE_AGE = 'apache_age'  # Apache Age graph extension for PostgreSQL
 
 
 class GraphDriverSession(ABC):
